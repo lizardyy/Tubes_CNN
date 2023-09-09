@@ -15,7 +15,7 @@ class Convolution:
         self.output_size = (((input_size[0] - filter_size[0] + 2 * padding_size) // stride ) + 1, ((input_size[1] - filter_size[1] + 2 * padding_size) // stride ) + 1)
 
 
-    def forward(self, input):
+    def convolution(self, input):
 
         # init random filter
         self.filter = [np.random.randn(self.filter_size[0], self.filter_size[1], input.shape[2]) for _ in range(self.num_filters)]
@@ -39,3 +39,22 @@ class Convolution:
 
         return self.output
 
+    def detector(self, input):
+        self.output = np.maximum(0, input)
+        return self.output
+    
+    def polling(self, input, filter_size, stride, mode):
+        input_size = input.shape
+        output_size = (((input_size[0] - filter_size[0] ) // stride ) + 1, ((input_size[1] - filter_size[1]) // stride ) + 1)
+        output = np.zeros((output_size[0], output_size[1],input_size[2]))
+        for i in range(0,input_size[0] - filter_size[0] +1, stride):
+            for j in range(0, input_size[1] - filter_size[1] +1 ,stride):
+                for n in range(input_size[2]):
+                    input_patch = input[i:i+filter_size[0], j:j+filter_size[1], n]
+                    if mode == "max":
+                        # Max pooling
+                        output[i//stride][j//stride][n] = np.max(input_patch)
+                    elif mode == "average":
+                        # Average pooling
+                        output[i//stride][j//stride][n] = np.mean(input_patch)
+            return output
