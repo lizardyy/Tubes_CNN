@@ -1,4 +1,4 @@
-class FlattenLayer:
+class Flatten:
     def __init__(self):
         pass
 
@@ -7,6 +7,6 @@ class FlattenLayer:
         input_shape = input_data.shape
 
         # Melakukan flatten, mengubah tensor tiga dimensi menjadi tensor dua dimensi
-        output_data = input_data.reshape((input_shape[0], -1))
+        output_data = input_data.flatten()
 
         return output_data
