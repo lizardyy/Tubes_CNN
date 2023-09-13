@@ -13,6 +13,10 @@ class Flatten:
         return output_data
     
     def getModel(self):
-        return ''
+        model = {
+            "type": "flatten",
+            "params": {}
+        }
+        return model
 
     

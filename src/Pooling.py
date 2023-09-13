@@ -23,4 +23,8 @@ class Pooling:
         return output
     
     def getModel(self):
-        return ''
+        model = {
+            "type": "max_pooling2d",
+            "params": {}
+        },
+        return model
