@@ -1,3 +1,4 @@
+import numpy as np
 class Flatten:
     def __init__(self):
         pass
@@ -10,3 +11,8 @@ class Flatten:
         output_data = input_data.flatten()
 
         return output_data
+    
+    def getModel(self):
+        return ''
+
+    

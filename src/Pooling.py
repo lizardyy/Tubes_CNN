@@ -21,3 +21,6 @@ class Pooling:
                         # Average pooling
                         output[i//self.stride][j//self.stride][n] = np.mean(input_patch)
         return output
+    
+    def getModel(self):
+        return ''
