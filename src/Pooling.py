@@ -26,5 +26,5 @@ class Pooling:
         model = {
             "type": "max_pooling2d",
             "params": {}
-        },
+        }
         return model

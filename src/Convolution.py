@@ -15,7 +15,7 @@ class Convolution:
         self.output_size = (((input_size[0] - filter_size[0] + 2 * padding_size) // stride ) + 1, ((input_size[1] - filter_size[1] + 2 * padding_size) // stride ) + 1)
         # init random filter
         self.filter = [np.random.randn(self.filter_size[0], self.filter_size[1], input_size[2]) for _ in range(self.num_filters)]
-        self.bias = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
+        self.bias = np.zeros(input_size[2])
 
     # include convolution and detector
     def forward(self, input):
@@ -36,7 +36,7 @@ class Convolution:
                     # Mengambil bagian input yang sesuai dengan ukuran filter
                     input_patch = padded_input[i:i+self.filter_size[0], j:j+self.filter_size[1]]
                     # Melakukan operasi konvolusi
-                    output[i//self.stride][j//self.stride][n] = np.maximum(0,np.sum(input_patch * self.filter[n]))
+                    output[i//self.stride][j//self.stride][n] = np.maximum(0, np.sum(input_patch * self.filter[n]) + self.bias[n])
 
         return output
     

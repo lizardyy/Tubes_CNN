@@ -1,5 +1,5 @@
 import numpy as np
-class DenseLayer:
+class Dense:
     def __init__(self, input_size, num_units, activation_function):
         self.input_size = input_size
         self.num_units = num_units
