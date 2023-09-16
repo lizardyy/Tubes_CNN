@@ -14,8 +14,8 @@ class Model:
             num = 0
 
             for i in range(len(batch_train)):
-                for j in range(len(batch_train[i])):
-                # for j in range(10):
+                # for j in range(len(batch_train[i])):
+                for j in range(5):
                     input = batch_train[i][j]
                     for layer in self.layers:
                         output = layer.forward(input)
@@ -47,3 +47,9 @@ class Model:
         # Open the file in write mode and write the save_model list to it as JSON
         with open(file_name, 'w') as json_file:
             json.dump(save_model, json_file)
+
+    def showModel(self):
+        print("Layer (type)         Output Shape             Param #")
+        print("========================================================")
+        for layer in self.layers:
+            layer.showModel()

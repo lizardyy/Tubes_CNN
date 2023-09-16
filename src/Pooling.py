@@ -20,6 +20,8 @@ class Pooling:
                     elif self.mode == "average":
                         # Average pooling
                         output[i//self.stride][j//self.stride][n] = np.mean(input_patch)
+        self.output_size = output.shape
+
         return output
     
     def getModel(self):
@@ -28,3 +30,7 @@ class Pooling:
             "params": {}
         }
         return model
+    
+    def showModel(self):
+        print(f"Pooling              {self.output_size}              0")
+        print("________________________________________________________")

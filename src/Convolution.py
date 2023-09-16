@@ -15,7 +15,7 @@ class Convolution:
         self.output_size = (((input_size[0] - filter_size[0] + 2 * padding_size) // stride ) + 1, ((input_size[1] - filter_size[1] + 2 * padding_size) // stride ) + 1)
         # init random filter
         self.filter = [np.random.randn(self.filter_size[0], self.filter_size[1], input_size[2]) for _ in range(self.num_filters)]
-        self.bias = np.zeros(input_size[2])
+        self.bias = np.zeros(self.num_filters)
 
     # include convolution and detector
     def forward(self, input):
@@ -52,3 +52,10 @@ class Convolution:
         }
 
         return model
+    
+    def setFilter(self, filter):
+        self.filter = filter
+
+    def showModel(self):
+        print(f"Convolution          {self.output_size}             {(self.num_filters * (self.filter_size[0] * self.filter_size[0] + 1))}")
+        print("________________________________________________________")
