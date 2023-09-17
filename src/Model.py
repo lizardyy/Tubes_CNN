@@ -1,10 +1,6 @@
 import json
 import numpy as np
 
-from Convolution import Convolution
-from Dense import Dense
-from Flatten import Flatten
-from Pooling import Pooling
 
 class Model: 
     def __init__(self):
