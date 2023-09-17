@@ -6,6 +6,17 @@ class Model:
     def __init__(self):
         self.layers =[]
 
+    def predict(self, X):
+        results = []
+        for x in X:
+            input = x
+            output = None
+            for layer in self.layers:
+                output = layer.forward(input)
+                input = output
+            results.append(output)
+        return np.array(results)
+
     def train_network(self,train_data, label_data, batch_size, lr=0.01, epochs=200):
         batch_train = np.array_split(train_data,batch_size)
         batch_label = np.array_split(label_data, batch_size)
