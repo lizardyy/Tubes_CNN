@@ -50,6 +50,10 @@ class Dense:
 
         return model
     
+    def setModel(self, modelJson):
+        self.weights = np.array(modelJson["params"]["kernel"])
+        self.bias = np.array(modelJson["params"]["bias"])
+    
     def setWeights(self, weights):
         self.input_size = weights.shape[0]
         self.weights = weights

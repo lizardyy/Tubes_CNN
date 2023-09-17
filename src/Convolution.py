@@ -19,6 +19,8 @@ class Convolution:
 
     # include convolution and detector
     def forward(self, input):
+        if self.input_size != None and input.shape != self.input_size:
+            raise TypeError(f"input size doesn't match! must be {self.input_size}")
 
 
         # Menambahkan padding jika diperlukan
@@ -46,12 +48,20 @@ class Convolution:
         model = {
             "type": "conv2d",
             "params":{
-                "kernel": filter_list ,
+                "kernel": filter_list,
                 "bias": bias_list
             }
         }
 
         return model
+
+    def setModel(self, modelJson):
+        self.filter = [np.array(filter_) for filter_ in modelJson["params"]["kernel"]]
+        self.bias = np.array(modelJson["params"]["bias"])
+
+        self.num_filters = len(modelJson["params"]["kernel"][0][0][0])
+        self.filter_size = len(modelJson["params"]["kernel"]), len(modelJson["params"]["kernel"][0])
+        
     
     def setFilter(self, filter):
         self.filter = filter

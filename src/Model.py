@@ -1,6 +1,11 @@
 import json
 import numpy as np
 
+from Convolution import Convolution
+from Dense import Dense
+from Flatten import Flatten
+from Pooling import Pooling
+
 class Model: 
     def __init__(self):
         self.layers =[]
@@ -47,6 +52,30 @@ class Model:
         # Open the file in write mode and write the save_model list to it as JSON
         with open(file_name, 'w') as json_file:
             json.dump(save_model, json_file)
+    
+    # To be continued on Milestone B
+    # @staticmethod
+    # def loadModel(file_name):
+    #     model = Model()
+    #     with open(file_name, 'r') as json_file:
+    #         layers = json.load(json_file)
+    #         for layer in layers:
+    #             l = None
+    #             match layer["type"]:
+    #                 case "conv2d":
+    #                     l = Convolution((256,256,3), 0, (3,3), 1, 1, None)
+    #                     l.setModel(layer)
+    #                 case "dense":
+    #                     l = Dense(1, "relu")
+    #                     l.setModel(layer)
+    #                 case "max_pooling2d":
+    #                     l = Pooling((2,2), 1, "max")
+    #                 case "average_pooling2d":
+    #                     l = Pooling((2,2), 1, "average")
+    #                 case "flatten":
+    #                     l = Flatten()
+    #             model.add(l)
+    #     return model
 
     def showModel(self):
         print("Layer (type)         Output Shape             Param #")

@@ -5,6 +5,7 @@ class Pooling:
         self.filter_size = filter_size
         self.stride = stride
         self.mode = mode
+        self.output_size = None
 
     def forward(self, input):
         input_size = input.shape
@@ -26,7 +27,7 @@ class Pooling:
     
     def getModel(self):
         model = {
-            "type": "max_pooling2d",
+            "type": f"{self.mode}_pooling2d",
             "params": {}
         }
         return model

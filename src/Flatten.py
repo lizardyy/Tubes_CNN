@@ -1,7 +1,7 @@
 import numpy as np
 class Flatten:
     def __init__(self):
-        pass
+        self.output_shape = None
 
     def forward(self, input_data):
         # Mendapatkan ukuran input
