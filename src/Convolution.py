@@ -40,6 +40,7 @@ class Convolution:
                     # Melakukan operasi konvolusi
                     output[i//self.stride][j//self.stride][n] = np.maximum(0, np.sum(input_patch * self.filter[n]) + self.bias[n])
 
+        self.output = output
         return output
     
     def getModel(self):

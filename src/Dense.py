@@ -27,7 +27,8 @@ class Dense:
             output_data = self.sigmoid(pre_activation)
         else:
             output_data =  pre_activation
-    
+
+        self.output = output_data
         return output_data
 
     def relu(self, x):

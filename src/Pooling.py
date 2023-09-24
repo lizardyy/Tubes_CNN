@@ -23,6 +23,7 @@ class Pooling:
                         output[i//self.stride][j//self.stride][n] = np.mean(input_patch)
         self.output_size = output.shape
 
+        self.output = output
         return output
     
     def getModel(self):

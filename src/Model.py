@@ -1,6 +1,6 @@
 import json
 import numpy as np
-
+import math
 
 class Model: 
     def __init__(self):
@@ -44,6 +44,34 @@ class Model:
             print(f"Epoch {epoch + 1}/{epochs} - Accuracy: {accuracy:.2f}%")    
                 
         return 0
+    
+    def fit(self, x=None, y=None, epochs=1, batch_size=32, learning_rate=0.001):
+        if not x or not y:
+            raise ValueError("x and y must be provided and not None")
+        if len(x) != len(y):
+            raise ValueError("length of x and y must be equal")
+        
+        data_count = len(x)
+        for epoch in range(epochs):
+            batchs_total = math.ceil( data_count / batch_size )
+            for batch in batchs_total:
+                batch_x = x[batch * batch_size : (batch + 1) * batch_size]
+                batch_y = y[batch * batch_size : (batch + 1) * batch_size]
+                batch_length = len(batch_x)
+                
+                for i in range(batch_length):
+                    label = batch_y[i]
+                    input = batch_x[i]
+                    output = None
+                    for layer in self.layers:
+                        output = layer.forward(input)
+                        input = output
+
+            # For each batch
+                # For each data
+                    # Forward
+                    # Backward
+                # Update weight
         
     def add(self,layer):
         self.layers.append(layer)

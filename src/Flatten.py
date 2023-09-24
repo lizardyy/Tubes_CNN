@@ -10,6 +10,7 @@ class Flatten:
         # Melakukan flatten, mengubah tensor tiga dimensi menjadi tensor dua dimensi
         output_data = input_data.flatten()
         self.output_shape = output_data.shape
+        self.output = output_data
         return output_data
     
     def getModel(self):
