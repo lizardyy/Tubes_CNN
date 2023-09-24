@@ -55,13 +55,14 @@ class Dense:
             errors = [label[i] - self.output[i] for i in range(self.num_units)]
             self.deltas = np.dot(errors, derivatives)
         else:
-            self.deltas = []
+            temp = []
             for front_weight in front_weights:
                 calculated = np.dot(front_deltas, front_weight).sum()
-                self.deltas.append(calculated)
-            self.deltas = np.dot(derivatives, np.array(self.deltas))
+                temp.append(calculated)
+
+            self.deltas = np.dot(derivatives, np.array(temp)) 
         
-        self.gradients = - np.dot(self.deltas, self.input)
+        self.gradients += -np.dot(self.deltas, self.input)
         return self.deltas
 
     def set_deltas(self, delta=0.):

@@ -19,6 +19,8 @@ class Convolution:
 
     # include convolution and detector
     def forward(self, input):
+        self.input = input
+
         if self.input_size != None and input.shape != self.input_size:
             raise TypeError(f"input size doesn't match! must be {self.input_size}")
 
@@ -43,6 +45,47 @@ class Convolution:
         self.output = output
         return output
     
+    def backward(self, front_deltas=None, label=None, front_weights=None):
+        derivatives = (self.output > 0) * 1.
+        if front_deltas != None:
+            self.deltas = self.fullconv(front_deltas, self.rotate180(front_weights) * derivatives)
+            self.gradients += -self.fullconv(self.deltas, self.relu(self.rotate180(self.input)))
+            return self.deltas
+    
+    # Calculate full convolution
+    def fullconv(self, m1, m2):
+        # Convolution: m2 is rotated 180 degree first
+        m2 = self.rotate180(m2)
+
+        m1_shape = m1.shape
+        M = m1_shape[0]
+        N = m1_shape[1]
+        d = 1
+        if (len(m1_shape) == 3):
+            d = m1_shape[2]
+
+        m2_shape = m2.shape
+        m = m2_shape[0]
+        n = m2_shape[1]
+
+        if d == 1:
+            result = np.zeros((M + m - 1, N + n - 1))
+        else:
+            result = np.zeros((M + m - 1, N + n - 1, d))
+
+        for i in range(M + m - 1):
+            for j in range(N + n - 1):
+                m1_slc = m1[max(i-m+1, 0) : i+1, max(j-n+1, 0) : j+1]
+                m2_slc = m2[max(m-i-1, 0) : (M-i+m-1), max(n-j-1, 0) : (N-j+n-1)]
+                result[i][j] = np.multiply(m1_slc, m2_slc).sum(axis=1).sum(axis=0)
+        return result
+
+    def rotate180(self, m):
+        return np.rot90(m, 2)
+
+    def relu(self, x):
+        return (x > 0) * x
+
     def getModel(self):
         filter_list = [filter_.tolist() for filter_ in self.filter]
         bias_list = self.bias.tolist()
