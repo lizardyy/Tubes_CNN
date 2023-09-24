@@ -58,15 +58,25 @@ class Model:
                 batch_x = x[batch * batch_size : (batch + 1) * batch_size]
                 batch_y = y[batch * batch_size : (batch + 1) * batch_size]
                 batch_length = len(batch_x)
-                
+
                 for i in range(batch_length):
                     label = batch_y[i]
                     input = batch_x[i]
+
+                    # Forward
                     output = None
                     for layer in self.layers:
                         output = layer.forward(input)
                         input = output
-
+                    
+                    # Backward: calculate delta and gradient
+                    front_deltas = None
+                    front_weights = None
+                    for l in range(len(self.layers), -1, -1):
+                        layer = self.layers[l]
+                        front_deltas = layer.backward(front_deltas=front_deltas, label=label, front_weights=front_weights)
+                        front_weights = layer.weights
+                        
             # For each batch
                 # For each data
                     # Forward
