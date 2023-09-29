@@ -13,6 +13,7 @@ class Dense:
         
         # Store last input, output, deltas, and gradients
         self.input = None
+        self.net = None
         self.output = None
         self.deltas = np.array([0. for _ in range(self.num_units)])
         self.gradients = np.array([0. for _ in range(self.num_units)])
@@ -26,6 +27,9 @@ class Dense:
         
         # Perform matrix multiplication (input_data * weights) and add bias
         pre_activation = np.dot(input_data, self.weights) + self.bias
+
+        # Store the pre-activation (net)
+        self.net = pre_activation
 
         # Apply activation function based on the chosen mode
         if self.activation_function == "relu":
@@ -45,22 +49,21 @@ class Dense:
             raise ValueError("if deltas is not None (i.e. hidden layer), front_weights must be provided")
         
         if self.activation_function == "relu":
-                derivatives = self.relu_derivative(self.output)
+            derivatives = self.relu_derivative(self.net)
         elif self.activation_function == "sigmoid":
-            derivatives = self.sigmoid_derivative(self.output)
+            derivatives = self.sigmoid_derivative(self.net)
         else:
-            derivatives = np.copy(self.output)
+            derivatives = np.copy(self.net)
 
         if front_deltas == None:
             errors = [label[i] - self.output[i] for i in range(self.num_units)]
-            self.deltas = np.dot(errors, derivatives)
+            self.deltas = np.multiply(errors, derivatives)
         else:
-            temp = []
-            for front_weight in front_weights:
-                calculated = np.dot(front_deltas, front_weight).sum()
-                temp.append(calculated)
+            sum_delta = np.zeros((len(front_weights, )))
+            for (i,front_weight) in enumerate(front_weights):
+                sum_delta[i] = np.multiply(front_deltas, front_weight).sum()
 
-            self.deltas = np.dot(derivatives, np.array(temp)) 
+            self.deltas = np.dot(derivatives, sum_delta) 
         
         self.gradients += -np.dot(self.deltas, self.input)
         return self.deltas

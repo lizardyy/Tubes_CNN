@@ -3,6 +3,9 @@ class Flatten:
     def __init__(self):
         self.output_shape = None
 
+        self.output = None
+        self.input = None
+
     def forward(self, input_data):
         # Mendapatkan ukuran input
         input_shape = input_data.shape

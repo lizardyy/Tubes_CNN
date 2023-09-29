@@ -17,6 +17,13 @@ class Convolution:
         self.filter = [np.random.randn(self.filter_size[0], self.filter_size[1], input_size[2]) for _ in range(self.num_filters)]
         self.bias = np.zeros(self.num_filters)
 
+        # Store last input, output, deltas, and gradients
+        self.input = None
+        self.net = None
+        self.output = None
+        self.deltas = np.zeros(input_size)
+        self.gradients = np.zeros(input_size)
+
     # include convolution and detector
     def forward(self, input):
         self.input = input
@@ -32,6 +39,7 @@ class Convolution:
             padded_input = input
 
         # init input
+        net = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
         output = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
 
         for i in range(0,self.input_size[0] - self.filter_size[0] + (2 * self.padding_size) + 1, self.stride):
@@ -39,17 +47,30 @@ class Convolution:
                 for n in range(self.num_filters):
                     # Mengambil bagian input yang sesuai dengan ukuran filter
                     input_patch = padded_input[i:i+self.filter_size[0], j:j+self.filter_size[1]]
+
                     # Melakukan operasi konvolusi
-                    output[i//self.stride][j//self.stride][n] = np.maximum(0, np.sum(input_patch * self.filter[n]) + self.bias[n])
+                    net[i//self.stride][j//self.stride][n] = np.sum(input_patch * self.filter[n]) + self.bias[n]
+                    
+                    # Melakukan fungsi aktivasi (relu)
+                    output[i//self.stride][j//self.stride][n] = np.maximum(0, self.net)
 
         self.output = output
         return output
     
     def backward(self, front_deltas=None, label=None, front_weights=None):
-        derivatives = (self.output > 0) * 1.
+        derivatives = self.relu_derivative(self.net)
+
         if front_deltas != None:
-            self.deltas = self.fullconv(front_deltas, self.rotate180(front_weights) * derivatives)
-            self.gradients += -self.fullconv(self.deltas, self.relu(self.rotate180(self.input)))
+            self.deltas = np.zeros((self.num_filters, self.output_size[0], self.output_size[1]))
+            for j in range(len(self.deltas[0])):
+                for k in range(len(front_weights)):
+                    front_delta = front_deltas[k]
+                    front_weight = front_weights[k,:,:,j]
+                    derivative = derivatives[k,:,:j]
+                    
+                    self.deltas[j] += np.multiply(self.fullconv(front_delta, front_weight), derivative)
+
+            self.gradients += -self.fullconv(self.deltas, self.relu(self.net))
             return self.deltas
     
     # Calculate full convolution
@@ -85,6 +106,15 @@ class Convolution:
 
     def relu(self, x):
         return (x > 0) * x
+
+    def relu_derivative(self, x):
+        return (x > 0) * 1.
+    
+    def set_deltas(self, delta=0.):
+        self.deltas = np.array([delta for _ in range(self.num_units)])
+
+    def set_gradients(self, gradient=0.):
+        self.gradients = np.array([gradient for _ in range(self.num_units)])
 
     def getModel(self):
         filter_list = [filter_.tolist() for filter_ in self.filter]
