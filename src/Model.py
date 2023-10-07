@@ -66,6 +66,8 @@ class Model:
 
                 for i in range(batch_length):
                     label = batch_y[i]
+                    if len(y.shape) == 1:   # In the label is not a list, convert it to list
+                        label = np.array([label])
                     input = batch_x[i]
 
                     # Forward
