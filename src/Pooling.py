@@ -8,6 +8,8 @@ class Pooling:
         self.output_size = None
 
     def forward(self, input):
+        self.input = input
+
         input_size = input.shape
         output_size = (((input_size[0] - self.filter_size[0] ) // self.stride ) + 1, ((input_size[1] - self.filter_size[1]) // self.stride ) + 1)
         output = np.zeros((output_size[0], output_size[1],input_size[2]))
@@ -25,6 +27,9 @@ class Pooling:
 
         self.output = output
         return output
+    
+    def backward(self, front_deltas=None, label=None, front_weights=None):
+        self.deltas = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
     
     def getModel(self):
         model = {

@@ -7,6 +7,8 @@ class Flatten:
         self.input = None
 
     def forward(self, input_data):
+        self.input = input_data
+
         # Mendapatkan ukuran input
         input_shape = input_data.shape
 
@@ -15,6 +17,10 @@ class Flatten:
         self.output_shape = output_data.shape
         self.output = output_data
         return output_data
+
+    def backward(self, front_deltas=None, label=None, front_weights=None):
+        self.weights = np.reshape(front_weights, self.input.shape)
+        self.deltas = np.reshape(front_deltas, self.input_shape)
     
     def getModel(self):
         model = {
