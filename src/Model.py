@@ -113,7 +113,7 @@ class Model:
             out_model = layer.getModel()
             if out_model != '':
                 save_model.append(out_model)
-        file_name = 'model.json'
+        file_name = './Model/model.json'
 
         # Open the file in write mode and write the save_model list to it as JSON
         with open(file_name, 'w') as json_file:
