@@ -3,6 +3,9 @@ import numpy as np
 import math
 
 from src.Convolution import Convolution
+from src.Pooling import Pooling
+from src.Dense import Dense
+from src.Flatten import Flatten
 
 class Model: 
     def __init__(self):
@@ -117,28 +120,35 @@ class Model:
             json.dump(save_model, json_file)
     
     # To be continued on Milestone B
-    # @staticmethod
-    # def loadModel(file_name):
-    #     model = Model()
-    #     with open(file_name, 'r') as json_file:
-    #         layers = json.load(json_file)
-    #         for layer in layers:
-    #             l = None
-    #             match layer["type"]:
-    #                 case "conv2d":
-    #                     l = Convolution((256,256,3), 0, (3,3), 1, 1, None)
-    #                     l.setModel(layer)
-    #                 case "dense":
-    #                     l = Dense(1, "relu")
-    #                     l.setModel(layer)
-    #                 case "max_pooling2d":
-    #                     l = Pooling((2,2), 1, "max")
-    #                 case "average_pooling2d":
-    #                     l = Pooling((2,2), 1, "average")
-    #                 case "flatten":
-    #                     l = Flatten()
-    #             model.add(l)
-    #     return model
+    @staticmethod
+    def loadModel(file_name):
+        model = Model()
+        filename = './Model/' +file_name
+        with open(filename, 'r') as json_file:
+            layers = json.load(json_file)
+            for layer in layers:
+                l = None
+                match layer["type"]:
+                    case "conv2d":
+                        num_kernel = len(layer["params"]["kernel"])
+                        kernel = layer["params"]["kernel"][0]
+                        depth = len(kernel)
+                        rows = len(kernel[0])
+                        cols = len(kernel[0][0])
+                        l = Convolution((256,256,3), 0, (rows,cols,depth), num_kernel, 1)
+                        l.setModel(layer)
+                    case "dense":
+                        num_units = len(layer["params"]["kernel"])
+                        l = Dense(num_units, "relu")
+                        l.setModel(layer)
+                    case "max_pooling2d":
+                        l = Pooling((2,2), 1, "max")
+                    case "average_pooling2d":
+                        l = Pooling((2,2), 1, "average")
+                    case "flatten":
+                        l = Flatten()
+                model.add(l)
+        return model
 
     def showModel(self):
         print("Layer (type)         Output Shape             Param #")
