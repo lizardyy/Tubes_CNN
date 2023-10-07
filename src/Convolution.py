@@ -172,13 +172,16 @@ class Convolution:
         self.filter = [np.array(filter_) for filter_ in modelJson["params"]["kernel"]]
         self.bias = np.array(modelJson["params"]["bias"])
 
-        self.num_filters = len(modelJson["params"]["kernel"][0][0][0])
-        self.filter_size = len(modelJson["params"]["kernel"]), len(modelJson["params"]["kernel"][0])
+        # self.num_filters = len(modelJson["params"]["kernel"][0][0][0])
+        # self.filter_size = len(modelJson["params"]["kernel"]), len(modelJson["params"]["kernel"][0])
         
     
     def setFilter(self, filter):
         self.filter = filter
 
-    def showModel(self):
-        print(f"Convolution          {self.output_size}             {(self.num_filters * (self.filter_size[0] * self.filter_size[0] + 1))}")
+    def showModel(self, input_size):
+        output_shape = (self.output_size[0],self.output_size[1],self.num_filters)
+        print(self.filter_size)
+        print(f"Convolution          ({output_shape})            {(self.num_filters * (self.filter_size[0] * self.filter_size[1] * self.filter_size[2] + 1))}")
         print("________________________________________________________")
+        return output_shape
