@@ -90,18 +90,18 @@ class Model:
                     layer.update_weights(learning_rate)
             
             # End of an epoch
-            # Calculate accuracy using binary cross entropy
-            # N = len(X)
-            # yp = self.predict(X)
-            # correct = 0
-            # for i in range(N):
-            #     if round(y[i][0]) == round(yp[i][0]):
-            #         correct += 1
-            # accuracy = correct / N
-            
-
             print(f"===== Epoch {epoch+1} =====")
-            # print(f"Accuracy: {accuracy}")
+
+            # Calculate accuracy (only for dense sigmoid with one output unit)
+            if isinstance(self.layers[-1], Dense) and self.layers[-1].num_units == 1:
+                N = len(X)
+                yp = self.predict(X)
+                correct = 0
+                for i in range(N):
+                    if round(y[i][0]) == round(yp[i][0]):
+                        correct += 1
+                accuracy = correct / N
+                print(f"Accuracy: {accuracy}")
                         
         
     def add(self,layer):

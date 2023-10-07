@@ -5,12 +5,11 @@ class Convolution:
     # TODO: diferent width / height
     def __init__(self, input_size, padding_size, filter_size, num_filters, stride):
         self.input_size = input_size
-        self.padding_size = padding_size
+        self.padding_size = int(padding_size)
         self.filter_size = filter_size
 
         self.num_filters = num_filters
-        self.stride = stride
-        # self.bias = bias
+        self.stride = int(stride)
 
         self.output_size = (((input_size[0] - filter_size[0] + 2 * padding_size) // stride ) + 1, ((input_size[1] - filter_size[1] + 2 * padding_size) // stride ) + 1)
         # init random filter
@@ -64,17 +63,46 @@ class Convolution:
         if front_deltas is None:
             errors = label - self.output
             self.deltas = np.multiply(errors, derivatives)
+
+            if self.stride > 1:
+                Md = (self.input_size[0] - self.filter_size[0] + 2*self.padding_size) + 1
+                Nd = (self.input_size[1] - self.filter_size[1] + 2*self.padding_size) + 1
+                pad_size = ((self.stride, self.stride))
+                temp = np.zeros((Md, Nd, self.num_filters))
+                for k in range(self.num_filters):
+                    dilated = self.dilate(self.deltas[:,:,k], pad_size)
+                    temp[:, :, k] += dilated[0:Md, 0:Nd]
+                self.deltas = temp
         else:
-            self.deltas = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
-            for k in range(self.num_filters):
-                for l in range(len(front_weights)):
-                    self.deltas[:, :, k] += self.fullconv(front_deltas[:, :, l], front_weights[l, :, :, k])
-            self.deltas = np.multiply(self.deltas, derivatives)
+            if self.stride == 1:
+                self.deltas = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
+                for k in range(self.num_filters):
+                    for l in range(len(front_weights)):
+                        self.deltas[:, :, k] += self.fullconv(front_deltas[:, :, l], front_weights[l, :, :, k])
+                self.deltas = np.multiply(self.deltas, derivatives)
+            else:
+                Md = (self.input_size[0] - self.filter_size[0] + 2*self.padding_size) + 1
+                Nd = (self.input_size[1] - self.filter_size[1] + 2*self.padding_size) + 1
+                self.deltas = np.zeros((Md, Nd, self.num_filters))
+                
+                for k in range(self.num_filters):
+                    for l in range(len(front_weights)):
+                        conv = self.fullconv(front_deltas[:, :, l], front_weights[l, :, :, k])
+                        pad_size = ((self.stride, self.stride))
+                        convdilated = self.dilate(conv, pad_size)
+                        self.deltas[:, :, k] += convdilated[0:Md, 0:Nd]
+                self.deltas = np.multiply(self.deltas, derivatives)
+
+        # Menambahkan padding jika diperlukan
+        if self.padding_size > 0:
+            padded_input = np.pad(self.input, ((self.padding_size, self.padding_size), (self.padding_size, self.padding_size), (0, 0)), mode='constant')
+        else:
+            padded_input = self.input
 
         for k in range(self.filter_size[2]):
             self.bias[k] += -np.sum(self.deltas[:, :, k])
             for i in range(self.num_filters):
-                self.gradients[i, :, :, k] += self.validconv(self.input[:, :, k], self.rotate180(self.deltas[:, :, i]))
+                self.gradients[i, :, :, k] += self.validconv(padded_input[:, :, k], self.rotate180(self.deltas[:, :, i]))
         
         return self.deltas
     
@@ -154,6 +182,12 @@ class Convolution:
 
     def set_gradients(self, gradient=0.):
         self.gradients = np.full((self.num_filters, self.filter_size[0], self.filter_size[1], self.filter_size[2]), gradient)
+
+    def dilate(self, x, dim):
+        result_shape = np.multiply(x.shape, dim)
+        result = np.zeros(result_shape, dtype=x.dtype)
+        result[0:result_shape[0]:dim[0], 0:result_shape[1]:dim[1]] = x
+        return result
 
     def getModel(self):
         filter_list = [filter_.tolist() for filter_ in self.filter]
