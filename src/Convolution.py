@@ -3,7 +3,7 @@ import numpy as np
 class Convolution:
     
     # TODO: diferent width / height
-    def __init__(self, input_size, padding_size, filter_size, num_filters, stride, bias):
+    def __init__(self, input_size, padding_size, filter_size, num_filters, stride):
         self.input_size = input_size
         self.padding_size = padding_size
         self.filter_size = filter_size
@@ -22,13 +22,14 @@ class Convolution:
         self.net = None
         self.output = None
         self.deltas = np.zeros(input_size)
+        self.bias_update = np.zeros(self.num_filters)
         self.gradients = np.zeros(input_size)
 
     # include convolution and detector
     def forward(self, input):
         self.input = input
 
-        if self.input_size != None and input.shape != self.input_size:
+        if self.input_size is not None and input.shape != self.input_size:
             raise TypeError(f"input size doesn't match! must be {self.input_size}")
 
 
@@ -39,7 +40,7 @@ class Convolution:
             padded_input = input
 
         # init input
-        net = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
+        self.net = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
         output = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
 
         for i in range(0,self.input_size[0] - self.filter_size[0] + (2 * self.padding_size) + 1, self.stride):
@@ -49,7 +50,7 @@ class Convolution:
                     input_patch = padded_input[i:i+self.filter_size[0], j:j+self.filter_size[1]]
 
                     # Melakukan operasi konvolusi
-                    net[i//self.stride][j//self.stride][n] = np.sum(input_patch * self.filter[n]) + self.bias[n]
+                    self.net[i//self.stride][j//self.stride][n] = np.sum(input_patch * self.filter[n]) + self.bias[n]
                     
                     # Melakukan fungsi aktivasi (relu)
                     output[i//self.stride][j//self.stride][n] = np.maximum(0, self.net)
@@ -60,18 +61,56 @@ class Convolution:
     def backward(self, front_deltas=None, label=None, front_weights=None):
         derivatives = self.relu_derivative(self.net)
 
-        if front_deltas != None:
-            self.deltas = np.zeros((self.num_filters, self.output_size[0], self.output_size[1]))
-            for j in range(len(self.deltas[0])):
-                for k in range(len(front_weights)):
-                    front_delta = front_deltas[k]
-                    front_weight = front_weights[k,:,:,j]
-                    derivative = derivatives[k,:,:j]
-                    
-                    self.deltas[j] += np.multiply(self.fullconv(front_delta, front_weight), derivative)
+        if front_deltas is None:
+            errors = label - self.output
+            self.deltas = np.multiply(errors, derivatives)
+        else:
+            self.deltas = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
+            for k in range(self.num_filters):
+                for l in range(len(front_weights)):
+                    self.deltas[:, :, k] += self.fullconv(front_deltas[:, :, l], front_weights[l, :, :, k])
+            self.deltas = np.multiply(self.deltas, derivatives)
 
-            self.gradients += -self.fullconv(self.deltas, self.relu(self.net))
-            return self.deltas
+        for k in range(self.filter_size[2]):
+            self.bias[k] += -np.sum(self.deltas[:, :, k])
+            for i in range(self.num_filters):
+                self.gradients[i] += -self.validconv(self.input[:, :, k], self.deltas[:, :, i])
+        
+        return self.deltas
+    
+    def update_weights(self, learning_rate):
+        self.weights -= learning_rate * self.gradients
+        self.bias -= learning_rate * self.bias_update
+        self.set_gradients(0)
+        self.bias = np.zeros(self.num_filters)
+
+        
+    def validconv(self, m1, m2):
+        # Convolution: m2 is rotated 180 degree first
+        m2 = self.rotate180(m2)
+
+        m1_shape = m1.shape
+        M = m1_shape[0]
+        N = m1_shape[1]
+        d = 1
+        if (len(m1_shape) == 3):
+            d = m1_shape[2]
+
+        m2_shape = m2.shape
+        m = m2_shape[0]
+        n = m2_shape[1]
+
+        if d == 1:
+            result = np.zeros((M + m - 1, N + n - 1))
+        else:
+            result = np.zeros((M + m - 1, N + n - 1, d))
+
+        for i in range(M - m + 1):
+            for j in range(N - n + 1):
+                m1_slc = m1[i : i+m, j : j+n]
+                result[i][j] = np.multiply(m1_slc, m2).sum(axis=1).sum(axis=0)
+        return result
+
     
     # Calculate full convolution
     def fullconv(self, m1, m2):
@@ -111,10 +150,10 @@ class Convolution:
         return (x > 0) * 1.
     
     def set_deltas(self, delta=0.):
-        self.deltas = np.array([delta for _ in range(self.num_units)])
+        self.deltas = np.full((self.output_size[0], self.output_size[1], self.num_filters), delta)
 
     def set_gradients(self, gradient=0.):
-        self.gradients = np.array([gradient for _ in range(self.num_units)])
+        self.gradients = np.full((self.num_filters, self.filter_size[0], self.filter_size[1], self.filter_size[2]), gradient)
 
     def getModel(self):
         filter_list = [filter_.tolist() for filter_ in self.filter]

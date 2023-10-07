@@ -1,6 +1,8 @@
 import numpy as np
 class Dense:
     def __init__(self, num_units, activation_function, input_size = None):
+        self.output_size = (num_units,)
+
         self.input_size = input_size
         self.num_units = num_units
         self.activation_function = activation_function
@@ -8,22 +10,24 @@ class Dense:
         # Initialize weights and bias with random values
         if (input_size != None):
             self.weights = np.random.randn(self.input_size, self.num_units)
+            self.gradients = np.zeros((self.input_size, self.num_units))
 
-        self.bias = np.zeros(num_units)
+        self.bias = np.zeros(self.num_units)
         
         # Store last input, output, deltas, and gradients
         self.input = None
         self.net = None
         self.output = None
-        self.deltas = np.array([0. for _ in range(self.num_units)])
-        self.gradients = np.array([0. for _ in range(self.num_units)])
+        self.deltas = np.zeros(self.num_units)
+        self.bias_update = np.zeros(self.num_units)
 
     def forward(self, input_data):
         self.input = input_data
 
-        if (self.input_size == None):
+        if (self.input_size is None):
             self.input_size = input_data.shape[0]
             self.weights = np.random.randn(self.input_size, self.num_units)
+            self.gradients = np.zeros((self.input_size, self.num_units))
         
         # Perform matrix multiplication (input_data * weights) and add bias
         pre_activation = np.dot(input_data, self.weights) + self.bias
@@ -43,9 +47,9 @@ class Dense:
         return output_data
 
     def backward(self, front_deltas=None, label=None, front_weights=None):
-        if front_deltas == None and label == None:
+        if front_deltas is None and label is None:
             raise ValueError("if deltas is None (i.e. output layer), label must be provided")
-        if front_deltas != None and front_weights == None:
+        if front_deltas is not None and front_weights is None:
             raise ValueError("if deltas is not None (i.e. hidden layer), front_weights must be provided")
         
         if self.activation_function == "relu":
@@ -55,24 +59,35 @@ class Dense:
         else:
             derivatives = np.copy(self.net)
 
-        if front_deltas == None:
+        if front_deltas is None:
             errors = [label[i] - self.output[i] for i in range(self.num_units)]
             self.deltas = np.multiply(errors, derivatives)
         else:
-            sum_delta = np.zeros((len(front_weights, )))
-            for (i,front_weight) in enumerate(front_weights):
-                sum_delta[i] = np.multiply(front_deltas, front_weight).sum()
-
-            self.deltas = np.dot(derivatives, sum_delta) 
+            self.deltas = np.zeros(self.num_units)
+            for i in range(self.num_units):
+                sum_delta = 0
+                for k in range(front_weights.shape[1]):
+                    sum_delta += front_deltas[k] * front_weights[i, k]
+                self.deltas[i] = derivatives[i] * sum_delta
         
-        self.gradients += -np.dot(self.deltas, self.input)
+        for k in range(self.num_units):
+            self.gradients[:, k] += -np.multiply(self.deltas[k], self.input)
+        self.bias_update += -self.deltas
+
         return self.deltas
 
+    def update_weights(self, learning_rate):
+        self.weights -= learning_rate * self.gradients
+        self.bias -= learning_rate * self.bias_update
+        self.set_gradients(0.)
+        self.bias_update = np.zeros(self.num_units)
+
     def set_deltas(self, delta=0.):
-        self.deltas = np.array([delta for _ in range(self.num_units)])
+        self.deltas = np.full(self.num_units, delta)
 
     def set_gradients(self, gradient=0.):
-        self.gradients = np.array([gradient for _ in range(self.num_units)])
+        if self.input_size is not None:
+            self.gradients = np.full((self.input_size, self.num_units), gradient)
 
 
     def relu(self, x):

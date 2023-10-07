@@ -45,17 +45,17 @@ class Model:
                 
         return 0
     
-    def fit(self, x=None, y=None, epochs=1, batch_size=32, learning_rate=0.001):
-        if not x or not y:
+    def fit(self, X=None, y=None, epochs=1, batch_size=32, learning_rate=0.001):
+        if X is None or y is None:
             raise ValueError("x and y must be provided and not None")
-        if len(x) != len(y):
+        if len(X) != len(y):
             raise ValueError("length of x and y must be equal")
         
-        data_count = len(x)
+        data_count = len(X)
         for epoch in range(epochs):
             batchs_total = math.ceil( data_count / batch_size )
-            for batch in batchs_total:
-                batch_x = x[batch * batch_size : (batch + 1) * batch_size]
+            for batch in range(batchs_total):
+                batch_x = X[batch * batch_size : (batch + 1) * batch_size]
                 batch_y = y[batch * batch_size : (batch + 1) * batch_size]
                 batch_length = len(batch_x)
 
@@ -72,16 +72,30 @@ class Model:
                     # Backward: calculate delta and gradient
                     front_deltas = None
                     front_weights = None
-                    for l in range(len(self.layers), -1, -1):
+                    for l in range(len(self.layers)-1, -1, -1):
                         layer = self.layers[l]
                         front_deltas = layer.backward(front_deltas=front_deltas, label=label, front_weights=front_weights)
                         front_weights = layer.weights
+                
+                # Update weights
+                for layer in self.layers:
+                    layer.update_weights(learning_rate)
+            
+            # End of an epoch
+            # Calculate accuracy using binary cross entropy
+            N = len(X)
+            yp = self.predict(X)
+            correct = 0
+            for i in range(N):
+                if round(y[i][0]) == round(yp[i][0]):
+                    correct += 1
+                # total -= (y[i][0] * math.log2(yp[i][0])) + (1-y[i][0]) * math.log2(1-yp[i][0])
+            accuracy = correct / N
+            
+
+            print(f"===== Epoch {epoch+1} =====")
+            print(f"Accuracy: {accuracy}")
                         
-            # For each batch
-                # For each data
-                    # Forward
-                    # Backward
-                # Update weight
         
     def add(self,layer):
         self.layers.append(layer)
