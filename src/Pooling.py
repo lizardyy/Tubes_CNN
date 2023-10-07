@@ -45,6 +45,64 @@ class Pooling:
                     self.deltas[:, :, k] += self.fullconv(front_deltas[:, :, l], front_weights[l, :, :, k])
 
         return self.deltas
+
+    def validconv(self, m1, m2):
+        # Convolution: m2 is rotated 180 degree first
+        m2 = self.rotate180(m2)
+
+        m1_shape = m1.shape
+        M = m1_shape[0]
+        N = m1_shape[1]
+        d = 1
+        if (len(m1_shape) == 3):
+            d = m1_shape[2]
+
+        m2_shape = m2.shape
+        m = m2_shape[0]
+        n = m2_shape[1]
+
+        if d == 1:
+            result = np.zeros((M - m + 1, N - n + 1))
+        else:
+            result = np.zeros((M - m + 1, N - n + 1, d))
+
+        for i in range(M - m + 1):
+            for j in range(N - n + 1):
+                m1_slc = m1[i : i+m, j : j+n]
+                result[i][j] = np.multiply(m1_slc, m2).sum(axis=1).sum(axis=0)
+        return result
+
+    
+    # Calculate full convolution
+    def fullconv(self, m1, m2):
+        # Convolution: m2 is rotated 180 degree first
+        m2 = self.rotate180(m2)
+
+        m1_shape = m1.shape
+        M = m1_shape[0]
+        N = m1_shape[1]
+        d = 1
+        if (len(m1_shape) == 3):
+            d = m1_shape[2]
+
+        m2_shape = m2.shape
+        m = m2_shape[0]
+        n = m2_shape[1]
+
+        if d == 1:
+            result = np.zeros((M + m - 1, N + n - 1))
+        else:
+            result = np.zeros((M + m - 1, N + n - 1, d))
+
+        for i in range(M + m - 1):
+            for j in range(N + n - 1):
+                m1_slc = m1[max(i-m+1, 0) : i+1, max(j-n+1, 0) : j+1]
+                m2_slc = m2[max(m-i-1, 0) : (M-i+m-1), max(n-j-1, 0) : (N-j+n-1)]
+                result[i][j] = np.multiply(m1_slc, m2_slc).sum(axis=1).sum(axis=0)
+        return result
+
+    def rotate180(self, m):
+        return np.rot90(m, 2)
     
     def getModel(self):
         model = {

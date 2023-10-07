@@ -19,8 +19,15 @@ class Flatten:
         return output_data
 
     def backward(self, front_deltas=None, label=None, front_weights=None):
-        self.weights = np.reshape(front_weights, self.input.shape)
-        self.deltas = np.reshape(front_deltas, self.input_shape)
+        self.deltas = np.zeros(self.output.shape[0])
+        for i in range(self.output.shape[0]):
+            sum_delta = 0
+            for k in range(front_weights.shape[1]):
+                sum_delta += front_deltas[k] * front_weights[i, k]
+            self.deltas[i] = sum_delta
+
+        self.weights = np.reshape(front_weights, (front_weights.shape[1], self.input.shape[0], self.input.shape[1], self.input.shape[2]))
+        self.deltas = np.reshape(self.deltas, self.input.shape)
         return self.deltas
     
     def getModel(self):
