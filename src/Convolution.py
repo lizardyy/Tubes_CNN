@@ -21,9 +21,9 @@ class Convolution:
         self.input = None
         self.net = None
         self.output = None
-        self.deltas = np.zeros(input_size)
+        self.deltas = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
         self.bias_update = np.zeros(self.num_filters)
-        self.gradients = np.zeros(input_size)
+        self.gradients = np.zeros((self.num_filters, self.filter_size[0], self.filter_size[1], self.filter_size[2]))
 
     # include convolution and detector
     def forward(self, input):
@@ -53,7 +53,7 @@ class Convolution:
                     self.net[i//self.stride][j//self.stride][n] = np.sum(input_patch * self.filter[n]) + self.bias[n]
                     
                     # Melakukan fungsi aktivasi (relu)
-                    output[i//self.stride][j//self.stride][n] = np.maximum(0, self.net)
+                    output[i//self.stride][j//self.stride][n] = np.maximum(0, self.net[i//self.stride][j//self.stride][n])
 
         self.output = output
         return output
@@ -74,14 +74,14 @@ class Convolution:
         for k in range(self.filter_size[2]):
             self.bias[k] += -np.sum(self.deltas[:, :, k])
             for i in range(self.num_filters):
-                self.gradients[i] += -self.validconv(self.input[:, :, k], self.deltas[:, :, i])
+                self.gradients[i, :, :, k] += self.validconv(self.input[:, :, k], self.rotate180(self.deltas[:, :, i]))
         
         return self.deltas
     
     def update_weights(self, learning_rate):
-        self.weights -= learning_rate * self.gradients
+        self.filter -= learning_rate * self.gradients
         self.bias -= learning_rate * self.bias_update
-        self.set_gradients(0)
+        self.set_gradients(0.)
         self.bias = np.zeros(self.num_filters)
 
         
@@ -101,9 +101,9 @@ class Convolution:
         n = m2_shape[1]
 
         if d == 1:
-            result = np.zeros((M + m - 1, N + n - 1))
+            result = np.zeros((M - m + 1, N - n + 1))
         else:
-            result = np.zeros((M + m - 1, N + n - 1, d))
+            result = np.zeros((M - m + 1, N - n + 1, d))
 
         for i in range(M - m + 1):
             for j in range(N - n + 1):

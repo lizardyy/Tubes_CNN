@@ -2,6 +2,8 @@ import json
 import numpy as np
 import math
 
+from src.Convolution import Convolution
+
 class Model: 
     def __init__(self):
         self.layers =[]
@@ -75,7 +77,10 @@ class Model:
                     for l in range(len(self.layers)-1, -1, -1):
                         layer = self.layers[l]
                         front_deltas = layer.backward(front_deltas=front_deltas, label=label, front_weights=front_weights)
-                        front_weights = layer.weights
+                        if isinstance(layer, Convolution):
+                            front_weights = layer.filter
+                        else:
+                            front_weights = layer.weights
                 
                 # Update weights
                 for layer in self.layers:
@@ -83,18 +88,17 @@ class Model:
             
             # End of an epoch
             # Calculate accuracy using binary cross entropy
-            N = len(X)
-            yp = self.predict(X)
-            correct = 0
-            for i in range(N):
-                if round(y[i][0]) == round(yp[i][0]):
-                    correct += 1
-                # total -= (y[i][0] * math.log2(yp[i][0])) + (1-y[i][0]) * math.log2(1-yp[i][0])
-            accuracy = correct / N
+            # N = len(X)
+            # yp = self.predict(X)
+            # correct = 0
+            # for i in range(N):
+            #     if round(y[i][0]) == round(yp[i][0]):
+            #         correct += 1
+            # accuracy = correct / N
             
 
             print(f"===== Epoch {epoch+1} =====")
-            print(f"Accuracy: {accuracy}")
+            # print(f"Accuracy: {accuracy}")
                         
         
     def add(self,layer):
