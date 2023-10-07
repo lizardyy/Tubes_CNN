@@ -70,6 +70,12 @@ class Model:
             if isinstance(self.layers[-1], Dense) and self.layers[-1].num_units == 1:
                 N = len(X)
                 yp = self.predict(X)
+                temp = np.zeros((y.shape[0], 1))
+                if len(y.shape) == 1:
+                    for i in range(len(y)):
+                        temp[i][0] = y[i]
+                y = temp
+                
                 correct = 0
                 for i in range(N):
                     if len(y.shape) == 1:
