@@ -127,6 +127,6 @@ class Dense:
     def setBias(self, bias):
         self.bias = bias
         
-    def showModel(self, input =1):
-        print(f"Dense                ({self.num_units})                 {(input + 1) * self.num_units}")
+    def showModel(self):
+        print(f"Dense                ({self.num_units})                 {(self.input_size +1) * self.num_units}")
         print("________________________________________________________")
