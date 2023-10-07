@@ -74,7 +74,9 @@ class Convolution:
                     temp[:, :, k] += dilated[0:Md, 0:Nd]
                 self.deltas = temp
         else:
-            if self.stride == 1:
+            if front_weights is None:
+                self.deltas = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
+            elif self.stride == 1:
                 self.deltas = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
                 for k in range(self.num_filters):
                     for l in range(len(front_weights)):
@@ -99,8 +101,10 @@ class Convolution:
         else:
             padded_input = self.input
 
+        for i in range(self.num_filters):
+            self.bias_update[i] += -np.sum(self.deltas[:, :, i])
+            
         for k in range(self.filter_size[2]):
-            self.bias[k] += -np.sum(self.deltas[:, :, k])
             for i in range(self.num_filters):
                 self.gradients[i, :, :, k] += self.validconv(padded_input[:, :, k], self.rotate180(self.deltas[:, :, i]))
         

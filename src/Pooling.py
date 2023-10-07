@@ -45,6 +45,9 @@ class Pooling:
                     self.deltas[:, :, k] += self.fullconv(front_deltas[:, :, l], front_weights[l, :, :, k])
 
         return self.deltas
+    
+    def update_weights(self, learning_rate):
+        return
 
     def validconv(self, m1, m2):
         # Convolution: m2 is rotated 180 degree first

@@ -26,9 +26,12 @@ class Flatten:
                 sum_delta += front_deltas[k] * front_weights[i, k]
             self.deltas[i] = sum_delta
 
-        self.weights = np.reshape(front_weights, (front_weights.shape[1], self.input.shape[0], self.input.shape[1], self.input.shape[2]))
+        self.weights = None
         self.deltas = np.reshape(self.deltas, self.input.shape)
         return self.deltas
+
+    def update_weights(self, learning_rate):
+        return
     
     def getModel(self):
         model = {

@@ -21,34 +21,6 @@ class Model:
                 input = output
             results.append(output)
         return np.array(results)
-
-    def train_network(self,train_data, label_data, batch_size, lr=0.01, epochs=200):
-        batch_train = np.array_split(train_data,batch_size)
-        batch_label = np.array_split(label_data, batch_size)
-        for epoch in range(epochs):
-            total_loss = 0.0
-            correct_predictions = 0
-            num = 0
-
-            for i in range(len(batch_train)):
-                # for j in range(len(batch_train[i])):
-                for j in range(5):
-                    input = batch_train[i][j]
-                    for layer in self.layers:
-                        output = layer.forward(input)
-                        input = output
-                    predictions = output[0]
-                    if (predictions>0.5):
-                        predict = 1
-                    else :
-                        predict = 0
-                    num +=1
-                    if predict == batch_label[i][j]:
-                        correct_predictions += 1
-            accuracy = (correct_predictions / num) * 100.0
-            print(f"Epoch {epoch + 1}/{epochs} - Accuracy: {accuracy:.2f}%")    
-                
-        return 0
     
     def fit(self, X=None, y=None, epochs=1, batch_size=32, learning_rate=0.001):
         if X is None or y is None:
@@ -100,8 +72,12 @@ class Model:
                 yp = self.predict(X)
                 correct = 0
                 for i in range(N):
-                    if round(y[i][0]) == round(yp[i][0]):
-                        correct += 1
+                    if len(y.shape) == 1:
+                        if round(y[i]) == round(yp[i]):
+                            correct += 1
+                    else:
+                        if round(y[i][0]) == round(yp[i][0]):
+                            correct += 1
                 accuracy = correct / N
                 print(f"Accuracy: {accuracy}")
                         
