@@ -21,6 +21,7 @@ class Flatten:
     def backward(self, front_deltas=None, label=None, front_weights=None):
         self.weights = np.reshape(front_weights, self.input.shape)
         self.deltas = np.reshape(front_deltas, self.input_shape)
+        return self.deltas
     
     def getModel(self):
         model = {

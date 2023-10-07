@@ -29,7 +29,22 @@ class Pooling:
         return output
     
     def backward(self, front_deltas=None, label=None, front_weights=None):
-        self.deltas = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
+        if self.mode == "max":
+            self.weights = np.full(self.filter_size, 1 / (self.filter_size[0] * self.filter_size[1]))
+
+            self.deltas = np.zeros(self.output_size)
+            for k in range(self.output_size[2]):
+                for l in range(len(front_weights)):
+                    self.deltas[:, :, k] += self.fullconv(front_deltas[:, :, l], front_weights[l, :, :, k])
+        elif self.mode == "average":
+            self.weights = np.full(self.filter_size, 1 / (self.filter_size[0] * self.filter_size[1]))
+
+            self.deltas = np.zeros(self.output_size)
+            for k in range(self.output_size[2]):
+                for l in range(len(front_weights)):
+                    self.deltas[:, :, k] += self.fullconv(front_deltas[:, :, l], front_weights[l, :, :, k])
+
+        return self.deltas
     
     def getModel(self):
         model = {
