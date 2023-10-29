@@ -6,6 +6,7 @@ from src.Convolution import Convolution
 from src.Pooling import Pooling
 from src.Dense import Dense
 from src.Flatten import Flatten
+from src.LSTM import LSTM
 
 class Model: 
     def __init__(self):
@@ -131,6 +132,10 @@ class Model:
                         l = Pooling((2,2), 1, "average")
                     case "flatten":
                         l = Flatten()
+                    case "lstm":
+                        l = LSTM((2,2), 1)
+                        l.setModel(layer)
+
                 model.add(l)
         return model
 

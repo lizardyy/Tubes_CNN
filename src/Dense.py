@@ -28,6 +28,7 @@ class Dense:
             self.input_size = input_data.shape[0]
             self.weights = np.random.randn(self.input_size, self.num_units)
             self.gradients = np.zeros((self.input_size, self.num_units))
+            self.bias = np.zeros(self.num_units)
         
         # Perform matrix multiplication (input_data * weights) and add bias
         pre_activation = np.dot(input_data, self.weights) + self.bias
@@ -119,6 +120,7 @@ class Dense:
     def setModel(self, modelJson):
         self.weights = np.array(modelJson["params"]["kernel"])
         self.bias = np.array(modelJson["params"]["bias"])
+        self.num_units = self.bias.shape[0]
     
     def setWeights(self, weights):
         self.input_size = weights.shape[0]
