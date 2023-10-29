@@ -1,26 +1,29 @@
 import numpy as np
 
-# weight_{state} merupakan gabungan U (weight associated with the input) dan W (weight associated with the hidden state)
 class LSTM:
     def __init__(self, input_size, num_units):
         self.input_size = input_size
         self.num_units = num_units
         
         # Weight matrices and biases for forget gate
-        self.weights_forget = np.random.rand(input_size + num_units, num_units)
-        self.bias_forget = np.zeros((1, num_units))
+        self.U_f = np.random.rand(input_size, num_units)
+        self.W_f = np.random.rand(num_units, num_units)
+        self.b_f = np.zeros((1, num_units))
         
         # Weight matrices and biases for input gate
-        self.weights_input = np.random.rand(input_size + num_units, num_units)
-        self.bias_input = np.zeros((1, num_units))
+        self.U_i = np.random.rand(input_size, num_units)
+        self.W_i = np.random.rand(num_units, num_units)
+        self.b_i = np.zeros((1, num_units))
         
         # Weight matrices and biases for cell state
-        self.weights_cell = np.random.rand(input_size + num_units, num_units)
-        self.bias_cell = np.zeros((1, num_units))
+        self.U_c = np.random.rand(input_size, num_units)
+        self.W_c = np.random.rand(num_units, num_units)
+        self.b_c = np.zeros((1, num_units))
         
         # Weight matrices and biases for output gate
-        self.weights_output = np.random.rand(input_size + num_units, num_units)
-        self.bias_output = np.zeros((1, num_units))
+        self.U_o = np.random.rand(input_size, num_units)
+        self.W_o = np.random.rand(num_units, num_units)
+        self.b_o = np.zeros((1, num_units))
         
         # Initial cell state and hidden state
         self.cell_state = np.zeros((1, num_units))
@@ -34,21 +37,23 @@ class LSTM:
 
     def forward(self, x):
         x = x.reshape(1, -1) 
-        concat_input = np.hstack((x, self.hidden_state))
+
         # forget gate
-        forget_gate = self.sigmoid(np.dot(concat_input, self.weights_forget) + self.bias_forget)
+        forget_gate = self.sigmoid(np.dot(x, self.U_f) + np.dot(self.hidden_state, self.W_f) + self.b_f)
         print(forget_gate)
+
         # input gate
-        input_gate = self.sigmoid(np.dot(concat_input, self.weights_input) + self.bias_input)
+        input_gate = self.sigmoid(np.dot(x, self.U_i) + np.dot(self.hidden_state, self.W_i) + self.b_i)
         print(input_gate)
         # candidate cell state
-        candidate_cell_state = self.tanh(np.dot(concat_input, self.weights_cell) + self.bias_cell)
+        candidate_cell_state = self.tanh(np.dot(x, self.U_c) + np.dot(self.hidden_state, self.W_c) + self.b_c)
         print(candidate_cell_state)
+
         # cell state
         self.cell_state = forget_gate * self.cell_state + input_gate * candidate_cell_state
         
         # output gate
-        output_gate = self.sigmoid(np.dot(concat_input, self.weights_output) + self.bias_output)
+        output_gate = self.sigmoid(np.dot(x, self.U_o) + np.dot(self.hidden_state, self.W_o) + self.b_o)
         print(output_gate)
         
         # hidden state
@@ -56,26 +61,38 @@ class LSTM:
         
         return self.cell_state, self.hidden_state
     
-    def set_weight(self,state, weight):
+    def set_weight_hidden(self,state, weight):
         if (state == 'forget'):
-            self.weights_forget = weight
+            self.W_f = weight
         elif(state=='input'):
-            self.weights_input = weight
+            self.W_i = weight
         elif(state=='cell'):
-            self.weights_cell = weight
+            self.W_c = weight
         elif (state == 'output'):
-            self.weights_output = weight
+            self.W_o = weight
         else:
             print("Invalid state")
     
+    def set_weight_input(self,state, weight):
+        if (state == 'forget'):
+            self.U_f = weight
+        elif(state=='input'):
+            self.U_i = weight
+        elif(state=='cell'):
+            self.U_c = weight
+        elif (state == 'output'):
+            self.U_o = weight
+        else:
+            print("Invalid state")
+
     def set_bias(self,state, bias):
         if (state == 'forget'):
-            self.bias_forget = bias
+            self.b_f = bias
         elif(state=='input'):
-            self.bias_input = bias
+            self.b_i = bias
         elif(state=='cell'):
-            self.bias_cell = bias
+            self.b_c = bias
         elif (state == 'output'):
-            self.bias_output = bias
+            self.b_o = bias
         else:
             print("Invalid state")
