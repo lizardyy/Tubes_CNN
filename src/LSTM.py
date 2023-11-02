@@ -44,39 +44,24 @@ class LSTM:
         return np.maximum(0, x)
 
     def forward(self, X):
-
         # Initial cell state and hidden state
         self.cell_state = np.zeros((1, self.num_units))
         self.hidden_state = np.zeros((1, self.num_units))
-        # print(X)
         for x in X:
-            # print(x)
-            # print("prev cell:", self.cell_state)
-            # print("prev hidden:", self.hidden_state)
             # forget gate
             forget_gate = self.sigmoid(np.dot(x, self.U_f) + np.dot(self.hidden_state, self.W_f) + self.b_f)
-            # print("forget:", forget_gate)
-            # print("forget:", forget_gate.shape)
 
             # input gate
             input_gate = self.sigmoid(np.dot(x, self.U_i) + np.dot(self.hidden_state, self.W_i) + self.b_i)
-            # print("input:", input_gate)
-            # print("input:", input_gate.shape)
 
             # candidate cell state
             candidate_cell_state = self.tanh(np.dot(x, self.U_c) + np.dot(self.hidden_state, self.W_c) + self.b_c)
-            # print("candidate cell:", candidate_cell_state)
-            # print("candidate cell:", candidate_cell_state.shape)
 
             # cell state
             self.cell_state = forget_gate * self.cell_state + input_gate * candidate_cell_state
-            # print("cell:", self.cell_state)
-            # print("cell:", self.cell_state.shape)
 
             # output gate
             output_gate = self.sigmoid(np.dot(x, self.U_o) + np.dot(self.hidden_state, self.W_o) + self.b_o)
-            # print("output:", output_gate)
-            # print("output:", output_gate.shape)
             
             # hidden state
             net = output_gate * self.tanh(self.cell_state)
@@ -86,9 +71,6 @@ class LSTM:
                 self.hidden_state = self.sigmoid(net)
             else:
                 self.hidden_state = net
-            # print("hidden:", self.hidden_state)
-            # print("output shape ", self.hidden_state.shape)
-        # print("last", self.hidden_state)
         return self.hidden_state.flatten()
     
     def set_weight_hidden(self,state, weight):
