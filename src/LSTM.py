@@ -1,7 +1,7 @@
 import numpy as np
 
 class LSTM:
-    def __init__(self, input_shape, num_units):
+    def __init__(self, input_shape, num_units, activation=None):
         self.input_shape = input_shape
         self.output_shape = (None, num_units)
 
@@ -28,6 +28,11 @@ class LSTM:
         self.U_o = np.random.rand(num_feature, num_units)
         self.W_o = np.random.rand(num_units, num_units)
         self.b_o = np.zeros((1, num_units))
+
+        # Activation function, default 'relu'
+        self.activation = 'relu'
+        if activation != None:
+            self.activation = activation
 
     def sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
@@ -74,7 +79,8 @@ class LSTM:
             # print("output:", output_gate.shape)
             
             # hidden state
-            self.hidden_state = output_gate * self.tanh(self.cell_state)
+            net = output_gate * self.tanh(self.cell_state)
+            self.hidden_state = self.relu(net)
             # print("hidden:", self.hidden_state)
             # print("output shape ", self.hidden_state.shape)
         # print("last", self.hidden_state)
