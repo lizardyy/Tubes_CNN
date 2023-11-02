@@ -34,6 +34,9 @@ class LSTM:
     
     def tanh(self, x):
         return np.tanh(x)
+    
+    def relu(self, x):
+        return np.maximum(0, x)
 
     def forward(self, X):
 
