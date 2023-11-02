@@ -40,6 +40,6 @@ class Flatten:
         }
         return model
     
-    def showModel(self, input =1):
+    def summary(self, input =1):
         print(f"Flatten              {self.output_shape}                  0 ")
         print("________________________________________________________")

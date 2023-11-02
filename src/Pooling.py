@@ -114,6 +114,6 @@ class Pooling:
         }
         return model
     
-    def showModel(self):
+    def summary(self):
         print(f"Pooling              {self.output_size}              0")
         print("________________________________________________________")

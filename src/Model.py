@@ -89,7 +89,9 @@ class Model:
                 print(f"Accuracy: {accuracy}")
                         
         
-    def add(self,layer):
+    def add(self, layer):
+        if (len(self.layers) > 0):
+            layer.input_shape = self.layers[-1].output_shape
         self.layers.append(layer)
 
     def saveModel(self):
@@ -139,8 +141,21 @@ class Model:
                 model.add(l)
         return model
 
-    def showModel(self):
-        print("Layer (type)         Output Shape             Param #")
-        print("========================================================")
+    def summary(self):
+        lwidth = 20
+        owidth = 20
+        pwidth = 15
+
+        print('Model: "sequential"')
+        print("_" * (lwidth + owidth + pwidth))
+
+        print(f"{'Layer (type)':<{lwidth}}{'Output Shape':<{owidth}}{'Param #':<{pwidth}}")
+        print("=" * (lwidth + owidth + pwidth))
+
+        total_params = 0
         for layer in self.layers:
-            layer.showModel()
+            total_params += layer.summary(lwidth, owidth, pwidth)
+        print("=" * (lwidth + owidth + pwidth))
+
+        print(f"Total params: {total_params}")
+        print("=" * (lwidth + owidth + pwidth))

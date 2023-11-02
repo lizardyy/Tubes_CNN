@@ -1,16 +1,16 @@
 import numpy as np
 class Dense:
-    def __init__(self, num_units, activation_function, input_size = None):
-        self.output_size = (num_units,)
+    def __init__(self, num_units, activation_function, input_shape = None):
+        self.input_shape = input_shape
+        self.output_shape = (None, num_units)
 
-        self.input_size = input_size
         self.num_units = num_units
         self.activation_function = activation_function
 
         # Initialize weights and bias with random values
-        if (input_size != None):
-            self.weights = np.random.randn(self.input_size, self.num_units)
-            self.gradients = np.zeros((self.input_size, self.num_units))
+        if (input_shape != None):
+            self.weights = np.random.randn(self.input_shape, self.num_units)
+            self.gradients = np.zeros((self.input_shape, self.num_units))
 
         self.bias = np.zeros(self.num_units)
         
@@ -24,10 +24,10 @@ class Dense:
     def forward(self, input_data):
         self.input = input_data
 
-        if (self.input_size is None):
-            self.input_size = input_data.shape[0]
-            self.weights = np.random.randn(self.input_size, self.num_units)
-            self.gradients = np.zeros((self.input_size, self.num_units))
+        if (self.input_shape is None):
+            self.input_shape = input_data.shape[0]
+            self.weights = np.random.randn(self.input_shape, self.num_units)
+            self.gradients = np.zeros((self.input_shape, self.num_units))
             self.bias = np.zeros(self.num_units)
         
         # Perform matrix multiplication (input_data * weights) and add bias
@@ -87,8 +87,8 @@ class Dense:
         self.deltas = np.full(self.num_units, delta)
 
     def set_gradients(self, gradient=0.):
-        if self.input_size is not None:
-            self.gradients = np.full((self.input_size, self.num_units), gradient)
+        if self.input_shape is not None:
+            self.gradients = np.full((self.input_shape, self.num_units), gradient)
 
 
     def relu(self, x):
@@ -123,12 +123,13 @@ class Dense:
         self.num_units = self.bias.shape[0]
     
     def setWeights(self, weights):
-        self.input_size = weights.shape[0]
+        self.input_shape = weights.shape[0]
         self.weights = weights
 
     def setBias(self, bias):
         self.bias = bias
         
-    def showModel(self):
-        print(f"Dense                ({self.num_units})                 {(self.input_size +1) * self.num_units}")
-        print("________________________________________________________")
+    def summary(self, lwidth, owidth, pwidth):
+        num_params =  self.num_units * (self.input_shape[1] + 1)
+        print(f"{'dense (Dense)':<{lwidth}}{f'{self.output_shape}':<{owidth}}{num_params:<{pwidth}}")
+        return num_params

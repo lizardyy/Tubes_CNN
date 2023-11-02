@@ -217,7 +217,7 @@ class Convolution:
     def setFilter(self, filter):
         self.filter = filter
 
-    def showModel(self, input_size):
+    def summary(self, input_size):
         output_shape = (self.output_size[0],self.output_size[1],self.num_filters)
         print(self.filter_size)
         print(f"Convolution          ({output_shape})            {(self.num_filters * (self.filter_size[0] * self.filter_size[1] * self.filter_size[2] + 1))}")

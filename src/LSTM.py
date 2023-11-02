@@ -2,6 +2,9 @@ import numpy as np
 
 class LSTM:
     def __init__(self, input_shape, num_units):
+        self.input_shape = input_shape
+        self.output_shape = (None, num_units)
+
         _, num_feature = input_shape
         self.num_feature = num_feature
         self.num_units = num_units
@@ -185,3 +188,8 @@ class LSTM:
         # Initial cell state and hidden state
         self.cell_state = np.zeros((1, self.num_units))
         self.hidden_state = np.zeros((1, self.num_units))
+
+    def summary(self, lwidth, owidth, pwidth):
+        num_params =  4 * self.num_units * (self.num_units + self.num_feature + 1)
+        print(f"{'lstm (LSTM)':<{lwidth}}{f'{self.output_shape}':<{owidth}}{num_params:<{pwidth}}")
+        return num_params
