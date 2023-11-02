@@ -80,7 +80,12 @@ class LSTM:
             
             # hidden state
             net = output_gate * self.tanh(self.cell_state)
-            self.hidden_state = self.relu(net)
+            if self.activation == 'relu':
+                self.hidden_state = self.relu(net)
+            elif self.activation == 'sigmoid':
+                self.hidden_state = self.sigmoid(net)
+            else:
+                self.hidden_state = net
             # print("hidden:", self.hidden_state)
             # print("output shape ", self.hidden_state.shape)
         # print("last", self.hidden_state)
@@ -158,11 +163,35 @@ class LSTM:
         print("b_c ",self.b_c.shape)
         print("b_o ",self.b_o.shape)
 
+    def getModel(self):
+        model = {
+            "type": "lstm",
+            "params":{
+                "U_i": self.U_i.tolist(),
+                "U_f": self.U_f.tolist(),
+                "U_c": self.U_c.tolist(),
+                "U_o": self.U_o.tolist(),
+
+                "W_i": self.W_i.tolist(),
+                "W_f": self.W_f.tolist(),
+                "W_c": self.W_c.tolist(),
+                "W_o": self.W_o.tolist(),
+
+                "b_i": self.b_i.reshape(-1).tolist(),
+                "b_f": self.b_f.reshape(-1).tolist(),
+                "b_c": self.b_c.reshape(-1).tolist(),
+                "b_o": self.b_o.reshape(-1).tolist(),
+
+                "activation": self.activation
+            }
+        }
+
+        return model
+
     # Pada load model berikut pada contoh spek yang diberikan U merupakan weight untuk hidden sedangkan W merupakan weight untuk input
     # Namun pada model yang kami buat adalah sebaliknya (berpatokan pada power point) dimana W untuk hidden dan U untuk input
     # Untuk itu kami merubah json contoh
-    def setModel(self,modelJson):
-
+    def setModel(self, modelJson):
         U_i = np.array(modelJson['params']["U_i"])
         self.set_weight_input("input",U_i)
         U_f = np.array(modelJson['params']["U_f"])
@@ -171,7 +200,6 @@ class LSTM:
         self.set_weight_input("cell",U_c)
         U_o = np.array(modelJson['params']["U_o"])
         self.set_weight_input("output",U_o)
-        
 
         W_i = np.array(modelJson['params']["W_i"])
         self.set_weight_hidden("input",W_i)
@@ -194,6 +222,8 @@ class LSTM:
         self.num_feature = U_f.shape[0]
         self.num_units = b_o.shape[0]
         self.output_shape = (None, self.num_units)
+        if 'activation' in modelJson['params']:
+            self.activation = modelJson['params']['activation']
 
         # Initial cell state and hidden state
         self.cell_state = np.zeros((1, self.num_units))
