@@ -3,24 +3,24 @@ import numpy as np
 class Convolution:
     
     # TODO: diferent width / height
-    def __init__(self, input_size, padding_size, filter_size, num_filters, stride):
-        self.input_size = input_size
+    def __init__(self, input_shape, padding_size, filter_size, num_filters, stride):
+        self.input_shape = input_shape
         self.padding_size = int(padding_size)
         self.filter_size = filter_size
 
         self.num_filters = num_filters
         self.stride = int(stride)
 
-        self.output_size = (((input_size[0] - filter_size[0] + 2 * padding_size) // stride ) + 1, ((input_size[1] - filter_size[1] + 2 * padding_size) // stride ) + 1)
+        self.output_shape = (((input_shape[0] - filter_size[0] + 2 * padding_size) // stride ) + 1, ((input_shape[1] - filter_size[1] + 2 * padding_size) // stride ) + 1)
         # init random filter
-        self.filter = [np.random.randn(self.filter_size[0], self.filter_size[1], input_size[2]) for _ in range(self.num_filters)]
+        self.filter = [np.random.randn(self.filter_size[0], self.filter_size[1], input_shape[2]) for _ in range(self.num_filters)]
         self.bias = np.zeros(self.num_filters)
 
         # Store last input, output, deltas, and gradients
         self.input = None
         self.net = None
         self.output = None
-        self.deltas = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
+        self.deltas = np.zeros((self.output_shape[0], self.output_shape[1], self.num_filters))
         self.bias_update = np.zeros(self.num_filters)
         self.gradients = np.zeros((self.num_filters, self.filter_size[0], self.filter_size[1], self.filter_size[2]))
 
@@ -28,8 +28,8 @@ class Convolution:
     def forward(self, input):
         self.input = input
 
-        if self.input_size is not None and input.shape != self.input_size:
-            raise TypeError(f"input size doesn't match! must be {self.input_size}")
+        if self.input_shape is not None and input.shape != self.input_shape:
+            raise TypeError(f"input size doesn't match! must be {self.input_shape}")
 
 
         # Menambahkan padding jika diperlukan
@@ -39,11 +39,11 @@ class Convolution:
             padded_input = input
 
         # init input
-        self.net = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
-        output = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
+        self.net = np.zeros((self.output_shape[0], self.output_shape[1], self.num_filters))
+        output = np.zeros((self.output_shape[0], self.output_shape[1], self.num_filters))
 
-        for i in range(0,self.input_size[0] - self.filter_size[0] + (2 * self.padding_size) + 1, self.stride):
-            for j in range(0, self.input_size[1] - self.filter_size[1] + (2 * self.padding_size) + 1,self.stride):
+        for i in range(0,self.input_shape[0] - self.filter_size[0] + (2 * self.padding_size) + 1, self.stride):
+            for j in range(0, self.input_shape[1] - self.filter_size[1] + (2 * self.padding_size) + 1,self.stride):
                 for n in range(self.num_filters):
                     # Mengambil bagian input yang sesuai dengan ukuran filter
                     input_patch = padded_input[i:i+self.filter_size[0], j:j+self.filter_size[1]]
@@ -65,8 +65,8 @@ class Convolution:
             self.deltas = np.multiply(errors, derivatives)
 
             if self.stride > 1:
-                Md = (self.input_size[0] - self.filter_size[0] + 2*self.padding_size) + 1
-                Nd = (self.input_size[1] - self.filter_size[1] + 2*self.padding_size) + 1
+                Md = (self.input_shape[0] - self.filter_size[0] + 2*self.padding_size) + 1
+                Nd = (self.input_shape[1] - self.filter_size[1] + 2*self.padding_size) + 1
                 pad_size = ((self.stride, self.stride))
                 temp = np.zeros((Md, Nd, self.num_filters))
                 for k in range(self.num_filters):
@@ -75,16 +75,16 @@ class Convolution:
                 self.deltas = temp
         else:
             if front_weights is None:
-                self.deltas = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
+                self.deltas = np.zeros((self.output_shape[0], self.output_shape[1], self.num_filters))
             elif self.stride == 1:
-                self.deltas = np.zeros((self.output_size[0], self.output_size[1], self.num_filters))
+                self.deltas = np.zeros((self.output_shape[0], self.output_shape[1], self.num_filters))
                 for k in range(self.num_filters):
                     for l in range(len(front_weights)):
                         self.deltas[:, :, k] += self.fullconv(front_deltas[:, :, l], front_weights[l, :, :, k])
                 self.deltas = np.multiply(self.deltas, derivatives)
             else:
-                Md = (self.input_size[0] - self.filter_size[0] + 2*self.padding_size) + 1
-                Nd = (self.input_size[1] - self.filter_size[1] + 2*self.padding_size) + 1
+                Md = (self.input_shape[0] - self.filter_size[0] + 2*self.padding_size) + 1
+                Nd = (self.input_shape[1] - self.filter_size[1] + 2*self.padding_size) + 1
                 self.deltas = np.zeros((Md, Nd, self.num_filters))
                 
                 for k in range(self.num_filters):
@@ -182,7 +182,7 @@ class Convolution:
         return (x > 0) * 1.
     
     def set_deltas(self, delta=0.):
-        self.deltas = np.full((self.output_size[0], self.output_size[1], self.num_filters), delta)
+        self.deltas = np.full((self.output_shape[0], self.output_shape[1], self.num_filters), delta)
 
     def set_gradients(self, gradient=0.):
         self.gradients = np.full((self.num_filters, self.filter_size[0], self.filter_size[1], self.filter_size[2]), gradient)
@@ -217,8 +217,12 @@ class Convolution:
     def setFilter(self, filter):
         self.filter = filter
 
-    def summary(self, input_size):
-        output_shape = (self.output_size[0],self.output_size[1],self.num_filters)
+    def summary(self, lwidth, owidth, pwidth):
+        num_params =  self.num_units * (self.input_shape + 1)
+        print(f"{'lstm (LSTM)':<{lwidth}}{f'{self.output_shape}':<{owidth}}{num_params:<{pwidth}}")
+        return num_params
+    
+        output_shape = (self.output_shape[0],self.output_shape[1],self.num_filters)
         print(self.filter_size)
         print(f"Convolution          ({output_shape})            {(self.num_filters * (self.filter_size[0] * self.filter_size[1] * self.filter_size[2] + 1))}")
         print("________________________________________________________")

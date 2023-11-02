@@ -121,6 +121,7 @@ class Dense:
         self.weights = np.array(modelJson["params"]["kernel"])
         self.bias = np.array(modelJson["params"]["bias"])
         self.num_units = self.bias.shape[0]
+        self.output_shape = (None, self.num_units)
     
     def setWeights(self, weights):
         self.input_shape = weights.shape[0]

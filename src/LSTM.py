@@ -184,6 +184,7 @@ class LSTM:
 
         self.num_feature = U_f.shape[0]
         self.num_units = b_o.shape[0]
+        self.output_shape = (None, self.num_units)
 
         # Initial cell state and hidden state
         self.cell_state = np.zeros((1, self.num_units))

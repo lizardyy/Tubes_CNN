@@ -94,23 +94,22 @@ class Model:
             layer.input_shape = self.layers[-1].output_shape
         self.layers.append(layer)
 
-    def saveModel(self):
+    def save_model(self, filename):
         save_model = []
         for layer in self.layers:
             out_model = layer.getModel()
             if out_model != '':
                 save_model.append(out_model)
-        file_name = './Model/model.json'
 
         # Open the file in write mode and write the save_model list to it as JSON
-        with open(file_name, 'w') as json_file:
+        with open(filename, 'w') as json_file:
             json.dump(save_model, json_file)
     
-    # To be continued on Milestone B
+    # Load model
     @staticmethod
-    def loadModel(file_name):
+    def load_model(file_name):
         model = Model()
-        filename = './Model/' +file_name
+        filename = file_name
         with open(filename, 'r') as json_file:
             layers = json.load(json_file)
             for layer in layers:
@@ -126,7 +125,10 @@ class Model:
                         l.setModel(layer)
                     case "dense":
                         num_units = len(layer["params"]["kernel"])
-                        l = Dense(num_units, "relu")
+                        activation = "linear"
+                        if 'activation' in layer["params"]:
+                            activation = layer["params"]["activation"]
+                        l = Dense(num_units, activation)
                         l.setModel(layer)
                     case "max_pooling2d":
                         l = Pooling((2,2), 1, "max")
