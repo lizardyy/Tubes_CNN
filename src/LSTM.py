@@ -108,42 +108,6 @@ class LSTM:
             self.b_o = bias
         else:
             print("Invalid state")
-    
-    def print_state(self):
-        # print("U")
-        # print("U_f ", self.U_f)
-        # print("U_i ", self.U_i)
-        # print("U_c ", self.U_c)
-        # print("U_o ", self.U_o)
-        # print()
-        # print("Weight")
-        # print("W_f ", self.W_f)
-        # print("W_i ",self.W_i)
-        # print("W_c ",self.W_c)
-        # print("W_o ",self.W_o)
-        # print()
-        # print("bias")
-        # print("b_f ",self.b_f)
-        # print("b_i ",self.b_i)
-        # print("b_c ",self.b_c)
-        # print("b_o ",self.b_o)
-        print("U")
-        print("U_f ", self.U_f.shape)
-        print("U_i ", self.U_i.shape)
-        print("U_c ", self.U_c.shape)
-        print("U_o ", self.U_o.shape)
-        print()
-        print("Weight")
-        print("W_f ", self.W_f.shape)
-        print("W_i ",self.W_i.shape)
-        print("W_c ",self.W_c.shape)
-        print("W_o ",self.W_o.shape)
-        print()
-        print("bias")
-        print("b_f ",self.b_f.shape)
-        print("b_i ",self.b_i.shape)
-        print("b_c ",self.b_c.shape)
-        print("b_o ",self.b_o.shape)
 
     def getModel(self):
         model = {
